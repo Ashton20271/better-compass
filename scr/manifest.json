@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Better Compass",
+  "description": "Some quality of life improvements for Compass",
+  "version": "1.0",
+    "icons": {
+    "128": "icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.compass.education/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ]
+    }
+  ],
+  "permissions": []
+}

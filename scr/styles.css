@@ -1,0 +1,76 @@
+html {
+  filter: invert(1) hue-rotate(180deg);
+  background: #0e1621;
+}
+
+img,
+video,
+canvas,
+svg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.timetable-class,
+[class*="timetable"],
+[class*="calendar"] {
+  transition: background-color 0.2s ease;
+}
+
+.home-schoolLogo {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.MuiBox-root.css-ecsxz {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.MuiBox-root {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.teacherContainer__profileImage,
+.teacherContainer__profileImage img {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+img[class*="avatar"],
+img[class*="Avatar"],
+img[class*="profile"],
+img[class*="Profile"],
+img[class*="user"],
+img[class*="User"],
+img[class*="teacher"],
+img[class*="Teacher"] {
+  filter: invert(1) hue-rotate(180deg) !important;
+  border-radius: 50%;
+}
+
+.MuiAvatar-root,
+.MuiAvatar-root img {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+img[src*="profile"],
+img[src*="avatar"],
+img[src*="user"],
+img[src*="teacher"] {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+[data-testid*="timetable"],
+[data-testid*="calendar"] {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+[class*="compass-day-calendar-day-bd-evt"] {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+[class*="compass-day-calendar-day-bd-evt"] * {
+  filter: none !important;
+}
