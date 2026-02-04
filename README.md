@@ -1,3 +1,4 @@
 # better-compass
 make compass better
-chrome web store pending other stores planned
+
+https://chrome.google.com/webstore/detail/iecjhnfeefcfmafmddeognddfaeckggn
