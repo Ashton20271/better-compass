@@ -16,13 +16,10 @@ svg {
   transition: background-color 0.2s ease;
 }
 
-.home-schoolLogo {
-  filter: invert(1) hue-rotate(180deg) !important;
+.MuiBox-root.css-ecsxz {
+  filter: none !important;
 }
 
-.MuiBox-root.css-ecsxz {
-  filter: invert(1) hue-rotate(180deg) !important;
-}
 
 .MuiBox-root {
   filter: invert(1) hue-rotate(180deg);
@@ -50,6 +47,10 @@ img[class*="Teacher"] {
   filter: invert(1) hue-rotate(180deg) !important;
 }
 
+.MuiBox-root.css-ecsxz {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
 img[src*="profile"],
 img[src*="avatar"],
 img[src*="user"],
@@ -72,5 +73,22 @@ input[type="range"] {
 }
 
 [class*="compass-day-calendar-day-bd-evt"] * {
+  filter: none !important;
+}
+
+.MuiStack-root.css-jxo36b {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.MuiAvatar-img.css-1hy9t21 {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+
+.logo-container {
+  isolation: isolate;
+}
+
+.home-schoolLogo {
   filter: none !important;
 }

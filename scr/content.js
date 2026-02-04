@@ -1,149 +1,205 @@
 (function () {
+  const INVERT_KEY = "compass-invert-enabled";
+  const inverted = localStorage.getItem(INVERT_KEY) !== "false";
+
+  function applyInvert(state) {
+    document.documentElement.style.filter = state
+      ? "invert(1) hue-rotate(180deg)"
+      : "none";
+  }
+
+  applyInvert(inverted);
+
+  const toggle = document.createElement("button");
+  toggle.textContent = inverted ? "Light Mode" : "Dark Mode";
+  toggle.style.cssText = `
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 99999;
+    background:#1f2937;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:12px;
+    cursor:pointer;
+  `;
+  document.body.appendChild(toggle);
+
+  toggle.onclick = () => {
+    const now = document.documentElement.style.filter === "none";
+    applyInvert(now);
+    localStorage.setItem(INVERT_KEY, now);
+    toggle.textContent = now ? "Light Mode" : "Dark Mode";
+  };
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .home-schoolLogo { filter:none!important; }
+
+    [class^="MuiBox-root css-"] { filter:none!important; }
+
+    img, video, canvas, svg { filter:invert(1) hue-rotate(180deg); }
+
+    [class*="avatar" i],
+    .MuiAvatar-root,
+    .MuiAvatar-root img,
+    .teacherContainer__profileImage,
+    .teacherContainer__profileImage img {
+      filter:none!important;
+    }
+
+    [class*="compass-day-calendar-day-bd-evt"] {
+      filter:invert(1) hue-rotate(180deg)!important;
+    }
+
+    [class*="compass-day-calendar-day-bd-evt"] * {
+      filter:none!important;
+    }
+  `;
+  document.head.appendChild(style);
+
   const picker = document.createElement("div");
   picker.style.cssText = `
-    position: absolute;
-    z-index: 9999;
-    background: rgba(20, 20, 20, 0.95);
-    color: #fff;
-    padding: 3px;
-    border-radius: 4px;
-    font-family: system-ui, sans-serif;
-    font-size: 10px;
-    display: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    width: 150px;
+    position:absolute;
+    z-index:99999;
+    background:rgba(20,20,20,.95);
+    color:white;
+    padding:6px;
+    border-radius:6px;
+    font-size:10px;
+    width:140px;
+    display:none;
   `;
 
   picker.innerHTML = `
-<div id="preview" style="height:18px;border-radius:3px;margin-bottom:3px;border:1px solid #333;"></div>
-<label style="font-size:11px;">Hue</label>
-<input id="h" type="range" min="0" max="360">
-<label style="font-size:11px;">Sat</label>
-<input id="s" type="range" min="0" max="100">
-<label style="font-size:11px;">Light</label>
-<input id="l" type="range" min="0" max="100">
-`;
+    <div id="preview" style="height:16px;margin-bottom:4px;border-radius:3px;"></div>
+    Hue<input id="h" type="range" min="0" max="360">
+    Sat<input id="s" type="range" min="0" max="100">
+    Light<input id="l" type="range" min="0" max="100">
+  `;
 
   document.body.appendChild(picker);
 
   let currentBlock = null;
-  let hideTimeout = null;
   let pinnedBlock = null;
+  let hideTimer = null;
 
   const h = picker.querySelector("#h");
   const s = picker.querySelector("#s");
   const l = picker.querySelector("#l");
   const preview = picker.querySelector("#preview");
 
-  function hsl() {
-    return `hsl(${h.value}, ${s.value}%, ${l.value}%)`;
+  function getKey(el) {
+    return "tt-" + el.innerText.trim();
   }
 
-  function getKey(el) {
-    if (!el) return null;
-    const text = el.innerText?.trim();
-    return text ? `compass-color-${text}` : null;
+  function hsl() {
+    return `hsl(${h.value},${s.value}%,${l.value}%)`;
   }
 
   function applyColor() {
     if (!currentBlock) return;
-    const color = hsl();
-    preview.style.background = color;
-    if (currentBlock) currentBlock.style.backgroundColor = color;
-    const key = getKey(currentBlock);
-    if (key) localStorage.setItem(key, color);
+    const c = hsl();
+    preview.style.background = c;
+    currentBlock.style.backgroundColor = c;
+    localStorage.setItem(getKey(currentBlock), c);
   }
 
   function show(block) {
-    if (!block) return;
-    clearTimeout(hideTimeout);
+    clearTimeout(hideTimer);
     currentBlock = block;
-    const rect = block.getBoundingClientRect();
-    const pickerWidth = 150;
-    let leftPos = rect.right + 4;
-    if (rect.right + pickerWidth + 10 > window.innerWidth) {
-      leftPos = rect.left - pickerWidth - 4;
-    }
-    picker.style.top = `${rect.top + window.scrollY}px`;
-    picker.style.left = `${leftPos + window.scrollX}px`;
-    picker.style.width = `${pickerWidth}px`;
+
+    const r = block.getBoundingClientRect();
+    picker.style.top = r.top + window.scrollY + "px";
+    picker.style.left = r.right + window.scrollX + 6 + "px";
     picker.style.display = "block";
 
-    const saved = localStorage.getItem(getKey(block)) || "hsl(200,60%,50%)";
-    const match = saved.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-    if (match) {
-      h.value = match[1];
-      s.value = match[2];
-      l.value = match[3];
+    const saved = localStorage.getItem(getKey(block));
+    if (saved) {
+      const m = saved.match(/\d+/g);
+      if (m) [h.value, s.value, l.value] = m;
     }
+
     applyColor();
   }
 
   function hideDelayed() {
     if (currentBlock === pinnedBlock) return;
-    hideTimeout = setTimeout(() => {
+    hideTimer = setTimeout(() => {
       picker.style.display = "none";
       currentBlock = null;
     }, 3000);
   }
 
-  function applySavedColors() {
-    const blocks = document.querySelectorAll('[class*="timetable"], [class*="calendar"], .event');
-    blocks.forEach(block => {
-      if (!block) return;
-      const key = getKey(block);
-      if (!key) return;
-      const saved = localStorage.getItem(key);
-      if (saved) block.style.backgroundColor = saved;
-    });
-  }
-
-  document.addEventListener("mouseover", e => {
-    if (!e.target) return;
-    if (
-      e.target.closest(".x-box-inner, .x-box-target") ||
-      e.target.closest(".menu-svg-icon.menu-svg-icon-calendar")
-    ) return;
-    const block = e.target.closest('[class*="timetable"], [class*="calendar"], .event');
-    if (!block) return;
-    show(block);
-  });
-
-  document.addEventListener("mouseout", e => {
-    if (!e.relatedTarget || !e.relatedTarget.closest?.('[class*="timetable"], [class*="calendar"], .event')) {
-      hideDelayed();
-    }
-  });
-
   document.addEventListener("contextmenu", e => {
-    if (!e.target) return;
     if (
-      e.target.closest(".x-box-inner, .x-box-target") ||
-      e.target.closest(".menu-svg-icon.menu-svg-icon-calendar")
-    ) return;
-    const block = e.target.closest('[class*="timetable"], [class*="calendar"], .event');
+      e.target.closest(".menu-svg-icon") ||
+      e.target.closest(".x-box-inner") ||
+      e.target.closest(".x-box-target") ||
+      e.target.closest(".x-toolbar")
+    )
+      return;
+
+    const block = e.target.closest(
+      '[class*="timetable"],[class*="calendar"],.event'
+    );
+
     if (!block) return;
+
     e.preventDefault();
     pinnedBlock = block;
     show(block);
   });
 
-  picker.addEventListener("mouseenter", () => clearTimeout(hideTimeout));
-  picker.addEventListener("mouseleave", hideDelayed);
+  picker.onmouseenter = () => clearTimeout(hideTimer);
+  picker.onmouseleave = hideDelayed;
 
-  [h, s, l].forEach(slider => slider.addEventListener("input", applyColor));
+  [h, s, l].forEach(x => x.addEventListener("input", applyColor));
 
-  window.addEventListener("load", applySavedColors);
-  setTimeout(applySavedColors, 1000);
+  function restoreColors() {
+    document
+      .querySelectorAll('[class*="timetable"],[class*="calendar"],.event')
+      .forEach(el => {
+        const c = localStorage.getItem(getKey(el));
+        if (c) el.style.backgroundColor = c;
+      });
+  }
 
-  const style = document.createElement("style");
-  style.id = "avatar-style";
-  style.textContent = `
-    .MuiAvatar-root.MuiAvatar-circular.box-content.border-white.border-16.border-solid.w-\\[120px\\].h-\\[120px\\].css-zawysc {
-      filter: none !important;
-      background-color: initial !important;
+  setTimeout(restoreColors, 1500);
+  window.addEventListener("load", restoreColors);
+
+  if (/login|auth|saml/i.test(location.href)) {
+    function clickSaml() {
+      const btn = document.getElementById("SamlLoginButton");
+      if (!btn) return false;
+
+      const r = btn.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+
+      ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(
+        type => {
+          btn.dispatchEvent(
+            new MouseEvent(type, {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+              clientX: x,
+              clientY: y
+            })
+          );
+        }
+      );
+
+      return true;
     }
-  `;
-  document.head.appendChild(style);
 
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      if (clickSaml() || tries > 40) clearInterval(timer);
+    }, 300);
+  }
 })();
