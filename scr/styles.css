@@ -1,6 +1,28 @@
+.MuiBox-root.css-70qvj9,
+.MuiBox-root.css-ecsxz {
+  filter: none !important;
+}
+
+html,
+body,
+*,
+*:before,
+*:after,
+strong,
+b {
+  color: #0a2342 !important;
+}
+
 html {
   filter: invert(1) hue-rotate(180deg);
   background: #0e1621;
+  color: #0a2342;
+}
+
+body,
+html,
+* {
+  color: #a7ceff !important;
 }
 
 img,
@@ -16,53 +38,6 @@ svg {
   transition: background-color 0.2s ease;
 }
 
-.MuiBox-root.css-ecsxz {
-  filter: none !important;
-}
-
-
-.MuiBox-root {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-.teacherContainer__profileImage,
-.teacherContainer__profileImage img {
-  filter: invert(1) hue-rotate(180deg) !important;
-}
-
-img[class*="avatar"],
-img[class*="Avatar"],
-img[class*="profile"],
-img[class*="Profile"],
-img[class*="user"],
-img[class*="User"],
-img[class*="teacher"],
-img[class*="Teacher"] {
-  filter: invert(1) hue-rotate(180deg) !important;
-  border-radius: 50%;
-}
-
-.MuiAvatar-root,
-.MuiAvatar-root img {
-  filter: invert(1) hue-rotate(180deg) !important;
-}
-
-.MuiBox-root.css-ecsxz {
-  filter: invert(1) hue-rotate(180deg) !important;
-}
-
-img[src*="profile"],
-img[src*="avatar"],
-img[src*="user"],
-img[src*="teacher"] {
-  filter: invert(1) hue-rotate(180deg) !important;
-}
-
-input[type="range"] {
-  width: 100%;
-  margin-bottom: 6px;
-}
-
 [data-testid*="timetable"],
 [data-testid*="calendar"] {
   filter: invert(1) hue-rotate(180deg) !important;
@@ -76,14 +51,38 @@ input[type="range"] {
   filter: none !important;
 }
 
+.MuiBox-root {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.teacherContainer__profileImage,
+.teacherContainer__profileImage img,
+.MuiAvatar-root,
+.MuiAvatar-root img,
+.MuiAvatar-img.css-1hy9t21,
+img[class*="avatar"],
+img[class*="Avatar"],
+img[class*="profile"],
+img[class*="Profile"],
+img[class*="user"],
+img[class*="User"],
+img[class*="teacher"],
+img[class*="Teacher"],
+img[src*="profile"],
+img[src*="avatar"],
+img[src*="user"],
+img[src*="teacher"] {
+  filter: invert(1) hue-rotate(180deg) !important;
+  border-radius: 50%;
+}
+
 .MuiStack-root.css-jxo36b {
-  filter: invert(1) hue-rotate(180deg) !important;
+  filter: none !important;
 }
 
-.MuiAvatar-img.css-1hy9t21 {
+.MuiStack-root.css-jxo36b * {
   filter: invert(1) hue-rotate(180deg) !important;
 }
-
 
 .logo-container {
   isolation: isolate;
@@ -91,4 +90,79 @@ input[type="range"] {
 
 .home-schoolLogo {
   filter: none !important;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+input[type="range"],
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-webkit-slider-runnable-track {
+  color: #000000 !important;
+  --text-color: #000000;
+}
+
+input[type="range"]::-ms-fill-lower,
+input[type="range"]::-ms-fill-upper {
+  color: #000000 !important;
+}
+
+.MuiPaper-root.css-1utwtsr {
+  filter: none !important;
+}
+
+.MuiPaper-root.css-1utwtsr * {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.MuiStack-root.css-jxo36b .MuiPaper-root {
+  filter: none !important;
+  background: #0e1621 !important;
+}
+
+.MuiStack-root.css-jxo36b .MuiPaper-root * {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
+.MuiStack-root.css-jxo36b .MuiDivider-root {
+  filter: invert(1) hue-rotate(180deg) !important;
+  opacity: 0.3;
+}
+
+.MuiStack-root.css-jxo36b .MuiPaper-root {
+  border-radius: 12px;
+}
+
+.MuiStack-root.css-jxo36b {
+  filter: none !important;
+  background-color: #0e1621 !important;
+  color: #0a2342 !important;
+}
+
+.MuiStack-root.css-jxo36b .MuiPaper-root {
+  filter: none !important;
+  background-color: #000000 !important;
+  color: #5d9eef !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.MuiStack-root.css-jxo36b *,
+.MuiStack-root.css-jxo36b strong,
+.MuiStack-root.css-jxo36b b {
+  filter: none !important;
+  color: #82baff !important;
+}
+
+.MuiStack-root.css-jxo36b .MuiTypography-colorTextSecondary {
+  color: #7eb1ff !important;
+}
+
+.MuiStack-root.css-jxo36b a {
+  color: #4391f6 !important;
+}
+
+.MuiStack-root.css-jxo36b .MuiDivider-root {
+  background-color: rgba(146, 255, 242, 0.1) !important;
 }

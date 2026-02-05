@@ -1,5 +1,7 @@
 (function () {
   const INVERT_KEY = "compass-invert-enabled";
+
+  /* ------------------ DARK MODE ------------------ */
   const inverted = localStorage.getItem(INVERT_KEY) !== "false";
 
   function applyInvert(state) {
@@ -34,32 +36,62 @@
     toggle.textContent = now ? "Light Mode" : "Dark Mode";
   };
 
+  /* ------------------ STYLE FIXES ------------------ */
   const style = document.createElement("style");
   style.textContent = `
-    .home-schoolLogo { filter:none!important; }
-
-    [class^="MuiBox-root css-"] { filter:none!important; }
-
-    img, video, canvas, svg { filter:invert(1) hue-rotate(180deg); }
-
-    [class*="avatar" i],
-    .MuiAvatar-root,
-    .MuiAvatar-root img,
-    .teacherContainer__profileImage,
-    .teacherContainer__profileImage img {
-      filter:none!important;
-    }
-
-    [class*="compass-day-calendar-day-bd-evt"] {
-      filter:invert(1) hue-rotate(180deg)!important;
-    }
-
-    [class*="compass-day-calendar-day-bd-evt"] * {
-      filter:none!important;
+    img, video, canvas, svg {
+      filter:invert(1) hue-rotate(180deg);
     }
   `;
   document.head.appendChild(style);
 
+  /* =================================================
+     🔥 NEWS FIX (Material UI – GUARANTEED)
+     ================================================= */
+
+  function fixNews() {
+    document.querySelectorAll(".MuiStack-root").forEach(stack => {
+      // Detect the News feed safely
+      if (!stack.innerText.includes("News")) return;
+
+      // Stop global invert from affecting News
+      stack.style.filter = "none";
+      stack.style.backgroundColor = "#0e1621";
+      stack.style.color = "#e6edf3";
+
+      // Fix cards
+      stack.querySelectorAll(".MuiPaper-root").forEach(card => {
+        card.style.filter = "none";
+        card.style.backgroundColor = "#0e1621";
+        card.style.color = "#e6edf3";
+        card.style.border = "1px solid rgba(255,255,255,0.08)";
+      });
+
+      // Fix dividers
+      stack.querySelectorAll(".MuiDivider-root").forEach(div => {
+        div.style.backgroundColor = "rgba(255,255,255,0.12)";
+      });
+
+      // Remove filters from text/icons
+      stack.querySelectorAll("*").forEach(el => {
+        el.style.filter = "none";
+      });
+    });
+  }
+
+  // Initial + delayed runs (React safety)
+  fixNews();
+  setTimeout(fixNews, 300);
+  setTimeout(fixNews, 1000);
+  setTimeout(fixNews, 2500);
+
+  // Watch for React re-renders
+  new MutationObserver(fixNews).observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  /* ------------------ COLOR PICKER ------------------ */
   const picker = document.createElement("div");
   picker.style.cssText = `
     position:absolute;
@@ -75,40 +107,53 @@
 
   picker.innerHTML = `
     <div id="preview" style="height:16px;margin-bottom:4px;border-radius:3px;"></div>
-    Hue<input id="h" type="range" min="0" max="360">
-    Sat<input id="s" type="range" min="0" max="100">
-    Light<input id="l" type="range" min="0" max="100">
+    Hue <input id="h" type="range" min="0" max="360">
+    Sat <input id="s" type="range" min="0" max="100">
+    Light <input id="l" type="range" min="0" max="100">
   `;
 
   document.body.appendChild(picker);
-
-  let currentBlock = null;
-  let pinnedBlock = null;
-  let hideTimer = null;
 
   const h = picker.querySelector("#h");
   const s = picker.querySelector("#s");
   const l = picker.querySelector("#l");
   const preview = picker.querySelector("#preview");
 
+  let currentBlock = null;
+  let pinnedBlock = null;
+
+  /* ------------------ STABLE KEY ------------------ */
   function getKey(el) {
-    return "tt-" + el.innerText.trim();
+    if (!el) return null;
+    if (el.dataset.colorKey) return el.dataset.colorKey;
+
+    const key =
+      "evt|" +
+      (el.getAttribute("data-id") ||
+        el.getAttribute("aria-label") ||
+        el.textContent.replace(/\s+/g, " ").trim().slice(0, 80));
+
+    el.dataset.colorKey = key;
+    return key;
   }
 
   function hsl() {
     return `hsl(${h.value},${s.value}%,${l.value}%)`;
   }
 
+  /* ------------------ APPLY + SAVE ------------------ */
   function applyColor() {
     if (!currentBlock) return;
-    const c = hsl();
-    preview.style.background = c;
-    currentBlock.style.backgroundColor = c;
-    localStorage.setItem(getKey(currentBlock), c);
+    const key = getKey(currentBlock);
+    if (!key) return;
+
+    const color = hsl();
+    currentBlock.style.backgroundColor = color;
+    preview.style.background = color;
+    localStorage.setItem(key, color);
   }
 
   function show(block) {
-    clearTimeout(hideTimer);
     currentBlock = block;
 
     const r = block.getBoundingClientRect();
@@ -116,7 +161,9 @@
     picker.style.left = r.right + window.scrollX + 6 + "px";
     picker.style.display = "block";
 
-    const saved = localStorage.getItem(getKey(block));
+    const key = getKey(block);
+    const saved = key && localStorage.getItem(key);
+
     if (saved) {
       const m = saved.match(/\d+/g);
       if (m) [h.value, s.value, l.value] = m;
@@ -125,27 +172,17 @@
     applyColor();
   }
 
-  function hideDelayed() {
-    if (currentBlock === pinnedBlock) return;
-    hideTimer = setTimeout(() => {
-      picker.style.display = "none";
-      currentBlock = null;
-    }, 3000);
+  function closePicker() {
+    picker.style.display = "none";
+    currentBlock = null;
+    pinnedBlock = null;
   }
 
+  /* ------------------ OPEN PICKER ------------------ */
   document.addEventListener("contextmenu", e => {
-    if (
-      e.target.closest(".menu-svg-icon") ||
-      e.target.closest(".x-box-inner") ||
-      e.target.closest(".x-box-target") ||
-      e.target.closest(".x-toolbar")
-    )
-      return;
-
     const block = e.target.closest(
       '[class*="timetable"],[class*="calendar"],.event'
     );
-
     if (!block) return;
 
     e.preventDefault();
@@ -153,53 +190,66 @@
     show(block);
   });
 
-  picker.onmouseenter = () => clearTimeout(hideTimer);
-  picker.onmouseleave = hideDelayed;
-
   [h, s, l].forEach(x => x.addEventListener("input", applyColor));
 
-  function restoreColors() {
-    document
+  /* ------------------ CLICK OFF TO CLOSE ------------------ */
+  document.addEventListener(
+    "pointerdown",
+    e => {
+      if (picker.style.display === "none") return;
+      if (picker.contains(e.target)) return;
+
+      const block = e.target.closest(
+        '[class*="timetable"],[class*="calendar"],.event'
+      );
+      if (block === pinnedBlock) return;
+
+      closePicker();
+    },
+    true
+  );
+
+  picker.addEventListener("pointerdown", e => e.stopPropagation());
+
+  /* ------------------ RESTORE COLORS ------------------ */
+  function restore(root = document) {
+    root
       .querySelectorAll('[class*="timetable"],[class*="calendar"],.event')
       .forEach(el => {
-        const c = localStorage.getItem(getKey(el));
-        if (c) el.style.backgroundColor = c;
+        const key = getKey(el);
+        const color = key && localStorage.getItem(key);
+        if (color) el.style.backgroundColor = color;
       });
   }
 
-  setTimeout(restoreColors, 1500);
-  window.addEventListener("load", restoreColors);
+  restore();
+  window.addEventListener("load", restore);
 
-  if (/login|auth|saml/i.test(location.href)) {
-    function clickSaml() {
-      const btn = document.getElementById("SamlLoginButton");
-      if (!btn) return false;
-
-      const r = btn.getBoundingClientRect();
-      const x = r.left + r.width / 2;
-      const y = r.top + r.height / 2;
-
-      ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(
-        type => {
-          btn.dispatchEvent(
-            new MouseEvent(type, {
-              bubbles: true,
-              cancelable: true,
-              view: window,
-              clientX: x,
-              clientY: y
-            })
-          );
-        }
-      );
-
-      return true;
-    }
-
-    let tries = 0;
-    const timer = setInterval(() => {
-      tries++;
-      if (clickSaml() || tries > 40) clearInterval(timer);
-    }, 300);
-  }
+  new MutationObserver(muts => {
+    muts.forEach(m =>
+      m.addedNodes.forEach(n => n.nodeType === 1 && restore(n))
+    );
+  }).observe(document.body, { childList: true, subtree: true });
 })();
+/* ===============================
+   FORCE NO-INVERT ON MUI BOXES
+   =============================== */
+
+function forceNoInvertBoxes() {
+  document
+    .querySelectorAll(".MuiBox-root.css-70qvj9, .MuiBox-root.css-ecsxz")
+    .forEach(el => {
+      el.style.filter = "none";
+      el.style.webkitFilter = "none";
+    });
+}
+
+/* run now + after React renders */
+forceNoInvertBoxes();
+setTimeout(forceNoInvertBoxes, 300);
+setTimeout(forceNoInvertBoxes, 1200);
+
+new MutationObserver(forceNoInvertBoxes).observe(document.body, {
+  childList: true,
+  subtree: true
+});
