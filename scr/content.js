@@ -1,7 +1,6 @@
 (function () {
   const INVERT_KEY = "compass-invert-enabled";
 
-  /* ------------------ DARK MODE ------------------ */
   const inverted = localStorage.getItem(INVERT_KEY) !== "false";
 
   function applyInvert(state) {
@@ -36,7 +35,6 @@
     toggle.textContent = now ? "Light Mode" : "Dark Mode";
   };
 
-  /* ------------------ STYLE FIXES ------------------ */
   const style = document.createElement("style");
   style.textContent = `
     img, video, canvas, svg {
@@ -45,21 +43,15 @@
   `;
   document.head.appendChild(style);
 
-  /* =================================================
-     🔥 NEWS FIX (Material UI – GUARANTEED)
-     ================================================= */
 
   function fixNews() {
     document.querySelectorAll(".MuiStack-root").forEach(stack => {
-      // Detect the News feed safely
       if (!stack.innerText.includes("News")) return;
 
-      // Stop global invert from affecting News
       stack.style.filter = "none";
       stack.style.backgroundColor = "#0e1621";
       stack.style.color = "#e6edf3";
 
-      // Fix cards
       stack.querySelectorAll(".MuiPaper-root").forEach(card => {
         card.style.filter = "none";
         card.style.backgroundColor = "#0e1621";
@@ -67,31 +59,26 @@
         card.style.border = "1px solid rgba(255,255,255,0.08)";
       });
 
-      // Fix dividers
       stack.querySelectorAll(".MuiDivider-root").forEach(div => {
         div.style.backgroundColor = "rgba(255,255,255,0.12)";
       });
 
-      // Remove filters from text/icons
       stack.querySelectorAll("*").forEach(el => {
         el.style.filter = "none";
       });
     });
   }
 
-  // Initial + delayed runs (React safety)
   fixNews();
   setTimeout(fixNews, 300);
   setTimeout(fixNews, 1000);
   setTimeout(fixNews, 2500);
 
-  // Watch for React re-renders
   new MutationObserver(fixNews).observe(document.body, {
     childList: true,
     subtree: true
   });
 
-  /* ------------------ COLOR PICKER ------------------ */
   const picker = document.createElement("div");
   picker.style.cssText = `
     position:absolute;
@@ -122,7 +109,6 @@
   let currentBlock = null;
   let pinnedBlock = null;
 
-  /* ------------------ STABLE KEY ------------------ */
   function getKey(el) {
     if (!el) return null;
     if (el.dataset.colorKey) return el.dataset.colorKey;
@@ -141,7 +127,6 @@
     return `hsl(${h.value},${s.value}%,${l.value}%)`;
   }
 
-  /* ------------------ APPLY + SAVE ------------------ */
   function applyColor() {
     if (!currentBlock) return;
     const key = getKey(currentBlock);
@@ -178,7 +163,6 @@
     pinnedBlock = null;
   }
 
-  /* ------------------ OPEN PICKER ------------------ */
   document.addEventListener("contextmenu", e => {
     const block = e.target.closest(
       '[class*="timetable"],[class*="calendar"],.event'
@@ -192,7 +176,6 @@
 
   [h, s, l].forEach(x => x.addEventListener("input", applyColor));
 
-  /* ------------------ CLICK OFF TO CLOSE ------------------ */
   document.addEventListener(
     "pointerdown",
     e => {
@@ -211,7 +194,6 @@
 
   picker.addEventListener("pointerdown", e => e.stopPropagation());
 
-  /* ------------------ RESTORE COLORS ------------------ */
   function restore(root = document) {
     root
       .querySelectorAll('[class*="timetable"],[class*="calendar"],.event')
@@ -230,26 +212,37 @@
       m.addedNodes.forEach(n => n.nodeType === 1 && restore(n))
     );
   }).observe(document.body, { childList: true, subtree: true });
-})();
-/* ===============================
-   FORCE NO-INVERT ON MUI BOXES
-   =============================== */
 
-function forceNoInvertBoxes() {
-  document
-    .querySelectorAll(".MuiBox-root.css-70qvj9, .MuiBox-root.css-ecsxz")
-    .forEach(el => {
-      el.style.filter = "none";
-      el.style.webkitFilter = "none";
+  function autoClickLoginButton() {
+    const loginButton = document.getElementById('SamlLoginButton');
+    if (loginButton) {
+      loginButton.click();
+      console.log('SAML Sign-in button clicked automatically.');
+    } else {
+      console.log('SAML Sign-in button not found.');
+    }
+  }
+
+  window.addEventListener('load', autoClickLoginButton);
+
+  setTimeout(autoClickLoginButton, 5000);
+
+  function observeAndClickLoginButton() {
+    const observer = new MutationObserver(() => {
+      const loginButton = document.getElementById('SamlLoginButton');
+      if (loginButton) {
+        loginButton.click();
+        observer.disconnect();
+        console.log('SAML Sign-in button clicked via MutationObserver.');
+      }
     });
-}
 
-/* run now + after React renders */
-forceNoInvertBoxes();
-setTimeout(forceNoInvertBoxes, 300);
-setTimeout(forceNoInvertBoxes, 1200);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  }
 
-new MutationObserver(forceNoInvertBoxes).observe(document.body, {
-  childList: true,
-  subtree: true
-});
+  observeAndClickLoginButton();
+
+})();
